@@ -1,12 +1,10 @@
 # Nex
 
-A lightweight PDF and EPUB reader built with JavaScript, PDF.js, and EPUB.js. 
-Epub is work on progres..
+A lightweight PDF reader built with JavaScript, PDF.js. 
 
 ## Features
 
 - 📄 PDF file support
-- 📚 EPUB file support
 - 📱 Responsive design
 - ↔️ Swipe navigation (mobile)
 - ◄► Page navigation buttons
@@ -32,13 +30,12 @@ Epub is work on progres..
 ## Usage
 
 1. Open `index.html` in your browser
-2. Click "Upload PDF or EPUB" to select a file
+2. Click "Upload PDF" to select a file
 3. Use the navigation buttons or swipe gestures to navigate through the document
 
 ## Technologies Used
 
 - [PDF.js](https://mozilla.github.io/pdf.js/) - PDF rendering library
-- [EPUB.js](https://github.com/futurepress/epub.js) - EPUB rendering library
 - [Inter](https://rsms.me/inter/) - Modern typeface
 - Service Workers - For PWA functionality
 
@@ -59,6 +56,5 @@ Distributed under the MIT License. See `LICENSE` for more information.
 ## Acknowledgements
 
 - Mozilla for PDF.js
-- FuturePress for EPUB.js
 - Rasmus Andersson for Inter typeface
 

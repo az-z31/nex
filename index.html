@@ -7,13 +7,21 @@
   <link rel="manifest" href="./manifest.json">
   <link rel="stylesheet" href="./styles.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/epubjs/dist/epub.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.min.js"></script>
 </head>
 <body>
   <div class="container">
-    <label for="fileInput" class="file-input-label">Upload PDF or EPUB</label>
-    <input type="file" id="fileInput" accept=".pdf,.epub" />
+    <div id="upload-zone">
+      <div id="upload-content">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="17 8 12 3 7 8"></polyline>
+          <line x1="12" y1="3" x2="12" y2="15"></line>
+        </svg>
+        <p>Drag & drop a PDF file or <span id="browse-text">browse</span></p>
+        <input type="file" id="fileInput" accept=".pdf">
+      </div>
+    </div>
     <div id="viewer"></div>
   </div>
   <script src="./viewer.js"></script>

@@ -1,23 +1,50 @@
 const fileInput = document.getElementById('fileInput');
 const viewer = document.getElementById('viewer');
-const uploadLabel = document.querySelector('.file-input-label');
+const uploadZone = document.getElementById('upload-zone');
+const uploadContent = document.getElementById('upload-content');
+const browseText = document.getElementById('browse-text');
 
+// Handle file input change
 fileInput.addEventListener('change', (event) => {
   const file = event.target.files[0];
-  if (!file) return;
+  if (file) handleFile(file);
+});
+
+// Handle click on upload zone or "browse" text
+uploadZone.addEventListener('click', () => fileInput.click());
+browseText.addEventListener('click', () => fileInput.click());
+
+// Handle drag-and-drop
+uploadZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  uploadZone.classList.add('dragover');
+});
+
+uploadZone.addEventListener('dragleave', () => {
+  uploadZone.classList.remove('dragover');
+});
+
+uploadZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) handleFile(file);
+});
+
+function handleFile(file) {
+  if (file.type !== 'application/pdf') {
+    alert('Please upload a valid PDF file.');
+    return;
+  }
 
   const reader = new FileReader();
   reader.onload = function(e) {
-    uploadLabel.style.display = 'none';
+    uploadZone.style.display = 'none';
     viewer.style.display = 'block';
-    if (file.type === 'application/pdf') {
-      renderPDF(e.target.result);
-    } else if (file.type === 'application/epub+zip') {
-      renderEPUB(e.target.result);
-    }
+    renderPDF(e.target.result);
   };
   reader.readAsArrayBuffer(file);
-});
+}
 
 let currentPage = 1;
 let pdfDoc = null;
@@ -120,14 +147,4 @@ function renderPage(pageNum) {
     console.error('Error rendering page:', error);
     container.innerHTML = '<p>Error rendering page.</p>';
   });
-}
-
-function renderEPUB(arrayBuffer) {
-  viewer.innerHTML = '';
-  const book = ePub(arrayBuffer);
-  const rendition = book.renderTo(viewer, {
-    width: '100%',
-    height: '100%'
-  });
-  rendition.display();
 } 

@@ -19,6 +19,17 @@ self.addEventListener('install', (event) => {
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request)
-      .then((response) => response || fetch(event.request))
+      .then((response) => {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request).catch(() => {
+          // Return a custom error page or response for failed requests
+          return new Response('Resource not found', {
+            status: 404,
+            statusText: 'Not Found'
+          });
+        });
+      })
   );
 }); 
