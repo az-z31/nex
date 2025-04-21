@@ -7,6 +7,13 @@ const pageIndicator = document.getElementById('page-indicator');
 
 let currentPage = 1;
 let pdfDoc = null;
+let showPercentage = false; // Track whether to show percentage or page number
+
+// Toggle between page number and percentage on click
+pageIndicator.addEventListener('click', () => {
+  showPercentage = !showPercentage; // Toggle the state
+  updatePageIndicator();
+});
 
 // Handle file input change
 fileInput.addEventListener('change', (event) => {
@@ -56,13 +63,14 @@ function renderPDF(arrayBuffer) {
     <div class="loading-spinner"></div>
     <button class="nav-arrow" id="prevPage">◄</button>
     <button class="nav-arrow" id="nextPage">►</button>
-    <div id="page-indicator">Page 1 of 1</div>
   `;
+  
+  // Reattach the page indicator to the viewer
+  viewer.appendChild(pageIndicator);
   
   const container = viewer.querySelector('#pdf-container');
   const prevButton = viewer.querySelector('#prevPage');
   const nextButton = viewer.querySelector('#nextPage');
-  const pageIndicator = viewer.querySelector('#page-indicator');
   
   pdfjsLib.getDocument({ data: arrayBuffer }).promise.then(pdf => {
     pdfDoc = pdf;
@@ -94,8 +102,16 @@ function renderPDF(arrayBuffer) {
 }
 
 function updatePageIndicator() {
-  const pageIndicator = viewer.querySelector('#page-indicator');
-  pageIndicator.textContent = `Page ${currentPage} of ${pdfDoc.numPages}`;
+  if (pdfDoc) {
+    if (showPercentage) {
+      // Calculate the percentage of the book completed
+      const percentage = Math.round((currentPage / pdfDoc.numPages) * 100);
+      pageIndicator.textContent = `${percentage}% completed`;
+    } else {
+      // Show the current page and total pages
+      pageIndicator.textContent = `Page ${currentPage} of ${pdfDoc.numPages}`;
+    }
+  }
 }
 
 function renderPage(pageNum) {
