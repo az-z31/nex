@@ -3,6 +3,10 @@ const viewer = document.getElementById('viewer');
 const uploadZone = document.getElementById('upload-zone');
 const uploadContent = document.getElementById('upload-content');
 const browseText = document.getElementById('browse-text');
+const pageIndicator = document.getElementById('page-indicator');
+
+let currentPage = 1;
+let pdfDoc = null;
 
 // Handle file input change
 fileInput.addEventListener('change', (event) => {
@@ -46,63 +50,31 @@ function handleFile(file) {
   reader.readAsArrayBuffer(file);
 }
 
-let currentPage = 1;
-let pdfDoc = null;
-
-function addSwipeListeners() {
-  let touchStartX = 0;
-  let touchEndX = 0;
-
-  viewer.addEventListener('touchstart', (e) => {
-    touchStartX = e.changedTouches[0].screenX;
-  });
-
-  viewer.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    handleSwipe();
-  });
-
-  function handleSwipe() {
-    const swipeThreshold = 50; // Minimum swipe distance in pixels
-    const swipeDistance = touchEndX - touchStartX;
-
-    if (swipeDistance > swipeThreshold) {
-      // Swipe right - previous page
-      if (currentPage > 1) {
-        currentPage--;
-        renderPage(currentPage);
-      }
-    } else if (swipeDistance < -swipeThreshold) {
-      // Swipe left - next page
-      if (currentPage < pdfDoc.numPages) {
-        currentPage++;
-        renderPage(currentPage);
-      }
-    }
-  }
-}
-
 function renderPDF(arrayBuffer) {
   viewer.innerHTML = `
     <div id="pdf-container" style="width:100%;height:100%;"></div>
     <div class="loading-spinner"></div>
     <button class="nav-arrow" id="prevPage">◄</button>
     <button class="nav-arrow" id="nextPage">►</button>
+    <div id="page-indicator">Page 1 of 1</div>
   `;
   
   const container = viewer.querySelector('#pdf-container');
   const prevButton = viewer.querySelector('#prevPage');
   const nextButton = viewer.querySelector('#nextPage');
+  const pageIndicator = viewer.querySelector('#page-indicator');
   
   pdfjsLib.getDocument({ data: arrayBuffer }).promise.then(pdf => {
     pdfDoc = pdf;
     viewer.querySelector('.loading-spinner').remove();
+    updatePageIndicator();
     renderPage(currentPage);
     
     prevButton.addEventListener('click', () => {
       if (currentPage > 1) {
         currentPage--;
         renderPage(currentPage);
+        updatePageIndicator();
       }
     });
     
@@ -110,6 +82,7 @@ function renderPDF(arrayBuffer) {
       if (currentPage < pdfDoc.numPages) {
         currentPage++;
         renderPage(currentPage);
+        updatePageIndicator();
       }
     });
 
@@ -118,6 +91,11 @@ function renderPDF(arrayBuffer) {
     console.error('Error loading PDF:', error);
     viewer.innerHTML = '<p>Error loading PDF. Please try another file.</p>';
   });
+}
+
+function updatePageIndicator() {
+  const pageIndicator = viewer.querySelector('#page-indicator');
+  pageIndicator.textContent = `Page ${currentPage} of ${pdfDoc.numPages}`;
 }
 
 function renderPage(pageNum) {
@@ -147,4 +125,39 @@ function renderPage(pageNum) {
     console.error('Error rendering page:', error);
     container.innerHTML = '<p>Error rendering page.</p>';
   });
+}
+
+function addSwipeListeners() {
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  viewer.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  });
+
+  viewer.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+  });
+
+  function handleSwipe() {
+    const swipeThreshold = 50; // Minimum swipe distance in pixels
+    const swipeDistance = touchEndX - touchStartX;
+
+    if (swipeDistance > swipeThreshold) {
+      // Swipe right - previous page
+      if (currentPage > 1) {
+        currentPage--;
+        renderPage(currentPage);
+        updatePageIndicator();
+      }
+    } else if (swipeDistance < -swipeThreshold) {
+      // Swipe left - next page
+      if (currentPage < pdfDoc.numPages) {
+        currentPage++;
+        renderPage(currentPage);
+        updatePageIndicator();
+      }
+    }
+  }
 } 
