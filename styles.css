@@ -222,4 +222,5 @@ input[type="file"] {
   font-size: 0.9rem;
   font-family: 'Inter', sans-serif;
   z-index: 10;
+  cursor: pointer;
 } 
