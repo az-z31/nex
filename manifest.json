@@ -1,10 +1,11 @@
 {
   "name": "Nex",
-  "short_name": "Reader",
-  "start_url": ".",
+  "short_name": "Nex",
+  "description": "A sleek PDF and EPUB viewer.",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4a90e2",
+  "background_color": "#121212",
+  "theme_color": "#1a73e8",
   "icons": [
     {
       "src": "icons/icon-192.png",
