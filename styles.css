@@ -176,6 +176,52 @@ input[type="file"] {
   overflow: hidden;
 }
 
+/* Responsive adjustments for mobile devices */
+@media (max-width: 768px) {
+  #upload-zone {
+    height: 200px;
+    max-width: 90%;
+    border-radius: 12px;
+  }
+
+  .upload-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 12px;
+  }
+
+  #upload-content {
+    font-size: 1rem;
+    padding: 0 16px;
+  }
+
+  #browse-text {
+    font-size: 1rem;
+  }
+}
+
+/* Further adjustments for very small screens */
+@media (max-width: 480px) {
+  #upload-zone {
+    height: 150px;
+    border-radius: 8px;
+  }
+
+  .upload-icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 8px;
+  }
+
+  #upload-content {
+    font-size: 0.9rem;
+  }
+
+  #browse-text {
+    font-size: 0.9rem;
+  }
+}
+
 #upload-zone.dragover {
   border-color: var(--primary-color);
   background-color: rgba(255, 255, 255, 0.1);
