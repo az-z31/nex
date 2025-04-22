@@ -42,6 +42,66 @@ uploadZone.addEventListener('drop', (e) => {
   if (file) handleFile(file);
 });
 
+// Add click event to show/hide top bar
+let topBarVisible = false;
+const topBar = document.getElementById('top-bar');
+
+// Initially hide the top bar
+topBar.style.display = 'none';
+
+viewer.addEventListener('click', (e) => {
+  // Only trigger if the click is not on the navigation arrows or page indicator
+  if (pdfDoc && !e.target.closest('.nav-arrow') && !e.target.closest('#page-indicator')) {
+    topBarVisible = !topBarVisible;
+    topBar.style.top = topBarVisible ? '0' : '-60px';
+  }
+});
+
+// Fix for PDF.js worker warning
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.worker.min.js';
+
+// Add swipe down detection for mobile
+let touchStartY = 0;
+let touchEndY = 0;
+const swipeThreshold = 100; // Minimum swipe distance in pixels
+
+viewer.addEventListener('touchstart', (e) => {
+  touchStartY = e.touches[0].clientY;
+});
+
+viewer.addEventListener('touchend', (e) => {
+  touchEndY = e.changedTouches[0].clientY;
+  handleSwipe();
+});
+
+function handleSwipe() {
+  const swipeDistance = touchEndY - touchStartY;
+
+  if (swipeDistance > swipeThreshold) {
+    // Swipe down detected - show top bar
+    topBar.style.top = '0';
+  }
+}
+
+// Add reload button functionality for desktop
+const reloadButton = document.getElementById('reload-button');
+reloadButton.addEventListener('click', () => {
+  window.location.reload();
+});
+
+// Add back button functionality
+const backButton = document.getElementById('back-button');
+backButton.addEventListener('click', () => {
+  // Reset viewer state
+  viewer.style.display = 'none';
+  uploadZone.style.display = 'flex';
+  pdfDoc = null;
+  currentPage = 1;
+  topBar.style.top = '-60px';
+  topBar.style.display = 'none';
+});
+
+// Show top bar when PDF is loaded
 function handleFile(file) {
   if (file.type !== 'application/pdf') {
     alert('Please upload a valid PDF file.');
@@ -52,6 +112,7 @@ function handleFile(file) {
   reader.onload = function(e) {
     uploadZone.style.display = 'none';
     viewer.style.display = 'block';
+    topBar.style.display = 'block';
     renderPDF(e.target.result);
   };
   reader.readAsArrayBuffer(file);

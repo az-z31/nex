@@ -271,4 +271,283 @@ input[type="file"] {
   font-family: 'Inter', sans-serif;
   z-index: 10;
   cursor: pointer;
+}
+
+/* Top navigation bar */
+#top-bar {
+  position: fixed;
+  top: -60px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+  transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#top-bar.visible {
+  top: 0; /* Show when visible class is added */
+}
+
+#back-button {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+#back-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#back-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+#reload-button {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+}
+
+#reload-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#reload-button svg {
+  width: 24px;
+  height: 24px;
+}
+
+.desktop-only {
+  display: none;
+}
+
+@media (pointer: fine) {
+  .desktop-only {
+    display: block;
+  }
+}
+
+#prevPage {
+  left: 20px;
+}
+
+#nextPage {
+  right: 20px;
+}
+
+/* Remove these classes if they exist */
+.textLayer {
+  display: none;
+}
+
+.textLayer > span {
+  display: none;
+}
+
+.textLayer ::selection {
+  display: none;
+}
+
+.textLayer ::-moz-selection {
+  display: none;
+}
+
+#bookreader-container {
+  width: 100%;
+  height: 100vh;
+  background-color: var(--background-color);
+}
+
+.loading-spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-top: 4px solid var(--primary-color);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+#upload-zone {
+  width: 100%;
+  max-width: 600px;
+  height: 300px;
+  border: 2px dashed var(--primary-color);
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Responsive adjustments for mobile devices */
+@media (max-width: 768px) {
+  #upload-zone {
+    height: 200px;
+    max-width: 90%;
+    border-radius: 12px;
+  }
+
+  .upload-icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 12px;
+  }
+
+  #upload-content {
+    font-size: 1rem;
+    padding: 0 16px;
+  }
+
+  #browse-text {
+    font-size: 1rem;
+  }
+}
+
+/* Further adjustments for very small screens */
+@media (max-width: 480px) {
+  #upload-zone {
+    height: 150px;
+    border-radius: 8px;
+  }
+
+  .upload-icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 8px;
+  }
+
+  #upload-content {
+    font-size: 0.9rem;
+  }
+
+  #browse-text {
+    font-size: 0.9rem;
+  }
+}
+
+#upload-zone.dragover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: scale(1.02);
+}
+
+#upload-content {
+  color: var(--text-color);
+  font-size: 1.1rem;
+  pointer-events: none;
+}
+
+#browse-text {
+  color: var(--primary-color);
+  font-weight: 500;
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.upload-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 16px;
+  color: var(--primary-color);
+}
+
+#fileInput {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+#page-indicator {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-family: 'Inter', sans-serif;
+  z-index: 10;
+  cursor: pointer;
+}
+
+/* Top navigation bar */
+#top-bar {
+  position: fixed;
+  top: -60px;
+  left: 0;
+  width: 100%;
+  height: 60px;
+  background-color: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+  transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#top-bar.visible {
+  top: 0; /* Show when visible class is added */
+}
+
+#back-button {
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+#back-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#back-button svg {
+  width: 20px;
+  height: 20px;
 } 
