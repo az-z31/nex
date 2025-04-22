@@ -101,12 +101,14 @@ input[type="file"] {
   border-radius: 0;
   z-index: 2;
   mix-blend-mode: difference;
+  display: none; /* Hide by default */
 }
 
-.nav-arrow:hover {
-  opacity: 1;
-  background-color: transparent;
-  mix-blend-mode: difference;
+/* Show arrows only on devices with pointer (computers) */
+@media (pointer: fine) {
+  .nav-arrow {
+    display: block;
+  }
 }
 
 #prevPage {
