@@ -287,11 +287,7 @@ input[type="file"] {
   justify-content: space-between;
   padding: 0 20px;
   z-index: 1000;
-  transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-#top-bar.visible {
-  top: 0; /* Show when visible class is added */
+  transition: top 0.3s ease;
 }
 
 #back-button {
@@ -522,11 +518,13 @@ input[type="file"] {
   justify-content: space-between;
   padding: 0 20px;
   z-index: 1000;
-  transition: top 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: top 0.3s ease, opacity 0.3s ease; /* Smooth transition */
+  opacity: 1;
 }
 
-#top-bar.visible {
-  top: 0; /* Show when visible class is added */
+#top-bar.hidden {
+  top: -60px;
+  opacity: 0;
 }
 
 #back-button {
@@ -550,4 +548,4 @@ input[type="file"] {
 #back-button svg {
   width: 20px;
   height: 20px;
-} 
+}
