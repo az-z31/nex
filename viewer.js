@@ -84,7 +84,6 @@ backButton.addEventListener('click', () => {
   uploadZone.style.display = 'flex';
   pdfDoc = null;
   currentPage = 1;
-  hideTopBar();
 });
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.worker.min.js';
