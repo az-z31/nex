@@ -6,11 +6,13 @@ const browseText = document.getElementById('browse-text');
 const pageIndicator = document.getElementById('page-indicator');
 const topBar = document.getElementById('top-bar');
 
-let currentPage = 1;
+let currentPage = localStorage.getItem('lastPage') ? parseInt(localStorage.getItem('lastPage')) : 1;
 let pdfDoc = null;
 let showPercentage = false;
 let topBarVisible = false;
 let inactivityTimer;
+let touchStartY = 0;
+let touchEndY = 0;
 
 topBar.style.top = '-60px';
 
@@ -58,18 +60,6 @@ uploadZone.addEventListener('drop', (e) => {
   if (file) handleFile(file);
 });
 
-viewer.addEventListener('click', (e) => {
-  if (pdfDoc && !e.target.closest('.nav-arrow') && !e.target.closest('#page-indicator')) {
-    if (window.matchMedia('(pointer: coarse)').matches) {
-      if (topBarVisible) {
-        hideTopBar();
-      } else {
-        showTopBar();
-      }
-    }
-  }
-});
-
 viewer.addEventListener('touchstart', (e) => {
   touchStartY = e.touches[0].clientY;
   resetInactivityTimer();
@@ -78,11 +68,19 @@ viewer.addEventListener('touchstart', (e) => {
 viewer.addEventListener('touchend', (e) => {
   touchEndY = e.changedTouches[0].clientY;
   const swipeDistance = touchEndY - touchStartY;
-  if (swipeDistance > 100) showTopBar();
+  
+  if (swipeDistance > 50 && !topBarVisible) {
+    showTopBar();
+  } else if (swipeDistance < -50 && topBarVisible) {
+    hideTopBar();
+  }
 });
 
 const reloadButton = document.getElementById('reload-button');
-reloadButton.addEventListener('click', () => window.location.reload());
+reloadButton.addEventListener('click', () => {
+  localStorage.removeItem('lastPage');
+  window.location.reload();
+});
 
 const backButton = document.getElementById('back-button');
 backButton.addEventListener('click', () => {
@@ -92,7 +90,7 @@ backButton.addEventListener('click', () => {
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.worker.min.js';
 
 function handleFile(file) {
-  if (file.type !== 'application/pdf') {
+  if (!file || file.type !== 'application/pdf') {
     alert('Please upload a valid PDF.');
     return;
   }
@@ -101,12 +99,16 @@ function handleFile(file) {
   reader.onload = function (e) {
     uploadZone.style.display = 'none';
     viewer.style.display = 'block';
-    showTopBar();
     if (window.matchMedia('(pointer: fine)').matches) {
       document.getElementById('back-button').classList.add('visible');
     }
     renderPDF(e.target.result);
   };
+  
+  // Clear the file input value to prevent re-triggering
+  fileInput.value = '';
+  
+  // Read the file
   reader.readAsArrayBuffer(file);
 }
 
@@ -175,6 +177,9 @@ function renderPage(pageNum) {
     canvas.width = viewport.width;
     container.appendChild(canvas);
     page.render({ canvasContext: context, viewport });
+    
+    // Save the current page to localStorage
+    localStorage.setItem('lastPage', pageNum);
   });
 }
 
