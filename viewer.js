@@ -15,14 +15,18 @@ let inactivityTimer;
 topBar.style.top = '-60px';
 
 function showTopBar() {
-  topBar.style.top = '0';
-  topBarVisible = true;
-  resetInactivityTimer();
+  if (window.matchMedia('(pointer: coarse)').matches) {
+    topBar.style.top = '0';
+    topBarVisible = true;
+    resetInactivityTimer();
+  }
 }
 
 function hideTopBar() {
-  topBar.style.top = '-60px';
-  topBarVisible = false;
+  if (window.matchMedia('(pointer: coarse)').matches) {
+    topBar.style.top = '-60px';
+    topBarVisible = false;
+  }
 }
 
 pageIndicator.addEventListener('click', () => {
@@ -56,10 +60,12 @@ uploadZone.addEventListener('drop', (e) => {
 
 viewer.addEventListener('click', (e) => {
   if (pdfDoc && !e.target.closest('.nav-arrow') && !e.target.closest('#page-indicator')) {
-    if (topBarVisible) {
-      hideTopBar();
-    } else {
-      showTopBar();
+    if (window.matchMedia('(pointer: coarse)').matches) {
+      if (topBarVisible) {
+        hideTopBar();
+      } else {
+        showTopBar();
+      }
     }
   }
 });
@@ -84,6 +90,7 @@ backButton.addEventListener('click', () => {
   uploadZone.style.display = 'flex';
   pdfDoc = null;
   currentPage = 1;
+  backButton.classList.remove('visible');
 });
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.worker.min.js';
@@ -99,6 +106,9 @@ function handleFile(file) {
     uploadZone.style.display = 'none';
     viewer.style.display = 'block';
     showTopBar();
+    if (window.matchMedia('(pointer: fine)').matches) {
+      document.getElementById('back-button').classList.add('visible');
+    }
     renderPDF(e.target.result);
   };
   reader.readAsArrayBuffer(file);

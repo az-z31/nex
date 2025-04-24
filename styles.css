@@ -288,11 +288,14 @@ input[type="file"] {
   padding: 0 20px;
   z-index: 1000;
   transition: top 0.3s ease, opacity 0.3s ease;
+  display: none; /* Hide by default */
 }
 
-#top-bar.hidden {
-  top: -60px;
-  opacity: 0;
+/* Show top bar only on touch devices */
+@media (pointer: coarse) {
+  #top-bar {
+    display: flex;
+  }
 }
 
 #back-button {
@@ -311,6 +314,14 @@ input[type="file"] {
   padding: 8px 12px;
   border-radius: 6px;
   transition: background-color 0.2s ease;
+  display: none; /* Hide by default */
+}
+
+/* Show back button only on devices with pointer (desktop) */
+@media (pointer: fine) {
+  #back-button.visible {
+    display: flex;
+  }
 }
 
 #back-button:hover {
