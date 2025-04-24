@@ -86,11 +86,7 @@ reloadButton.addEventListener('click', () => window.location.reload());
 
 const backButton = document.getElementById('back-button');
 backButton.addEventListener('click', () => {
-  viewer.style.display = 'none';
-  uploadZone.style.display = 'flex';
-  pdfDoc = null;
-  currentPage = 1;
-  backButton.classList.remove('visible');
+  window.location.reload();
 });
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.worker.min.js';
