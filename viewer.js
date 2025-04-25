@@ -85,7 +85,7 @@ reloadButton.addEventListener('click', () => {
 
 const backButton = document.getElementById('back-button');
 backButton.addEventListener('click', () => {
-  window.location.reload();
+  goBackToHome();
 });
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.worker.min.js';
@@ -189,21 +189,22 @@ function displayRecentBooks() {
 document.addEventListener('DOMContentLoaded', () => {
   displayRecentBooks();
   
-  // If there's a last viewed book, show the upload zone with a message
-  const recentBooks = JSON.parse(localStorage.getItem('recentBooks') || '[]');
-  if (recentBooks.length > 0) {
-    const lastBook = recentBooks[0];
-    document.getElementById('continue-reading').style.display = 'block';
-    document.getElementById('upload-content').innerHTML = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="17 8 12 3 7 8"></polyline>
-        <line x1="12" y1="3" x2="12" y2="15"></line>
-      </svg>
-      <p>Upload "${lastBook.name}" to continue reading from page ${lastBook.lastPage}</p>
-      <input type="file" id="fileInput" accept=".pdf">
-    `;
-  }
+  // Ensure the back button is hidden on page load
+  document.getElementById('back-button').classList.remove('visible');
+  
+  // Reset the upload content to the default message on page load
+  document.getElementById('upload-content').innerHTML = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="upload-icon">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+      <polyline points="17 8 12 3 7 8"></polyline>
+      <line x1="12" y1="3" x2="12" y2="15"></line>
+    </svg>
+    <p>Drag & drop a PDF file or <span id="browse-text">browse</span></p>
+    <input type="file" id="fileInput" accept=".pdf">
+  `;
+  
+  // Re-attach event listeners for the upload zone
+  document.getElementById('browse-text').addEventListener('click', () => fileInput.click());
 });
 
 function renderPDF(arrayBuffer, startPage = 1) {
@@ -331,3 +332,14 @@ function clearRecentBooks() {
 
 // You can call this function from the browser console to reset the recent books
 // clearRecentBooks();
+
+function goBackToHome() {
+  // Remove the 'visible' class from the back button
+  document.getElementById('back-button').classList.remove('visible');
+  
+  // Reload the page
+  window.location.reload();
+}
+
+// Add event listener for the back button
+document.getElementById('back-button').addEventListener('click', goBackToHome);
