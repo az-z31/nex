@@ -187,7 +187,15 @@ function displayRecentBooks() {
 
 // Call displayRecentBooks when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-  displayRecentBooks();
+  const recentBooks = JSON.parse(localStorage.getItem('recentBooks') || '[]');
+  
+  // Show "Continue Reading" only if there are recent books
+  if (recentBooks.length > 0) {
+    document.getElementById('continue-reading').style.display = 'block';
+    displayRecentBooks();
+  } else {
+    document.getElementById('continue-reading').style.display = 'none';
+  }
   
   // Ensure the back button is hidden on page load
   document.getElementById('back-button').classList.remove('visible');
