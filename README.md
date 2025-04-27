@@ -8,7 +8,6 @@ A lightweight PDF reader built with JavaScript, PDF.js.
 - 📱 Responsive design
 - ↔️ Swipe navigation (mobile)
 - ◄► Page navigation buttons
-- 🎨 Dark mode support
 - ⚡ Fast rendering
 - 📦 Progressive Web App (PWA) support
 - 📘 Dictionary mode(Work on progress)
