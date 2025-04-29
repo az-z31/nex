@@ -11,6 +11,7 @@ A lightweight PDF reader built with JavaScript, PDF.js.
 - ⚡ Fast rendering
 - 📦 Progressive Web App (PWA) support
 - 📘 Dictionary mode(Work on progress)
+- 💀 ts lowk pmo so much💔
 
 ## Installation
 
