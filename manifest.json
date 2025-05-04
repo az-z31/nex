@@ -2,7 +2,7 @@
   "name": "Nex",
   "short_name": "Nex",
   "description": "A sleek PDF viewer.",
-  "start_url": "/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#1a73e8",

@@ -2,6 +2,7 @@ const CACHE_NAME = 'nex-v1';
 const ASSETS = [
   './',
   './index.html',
+  './home.html',
   './styles.css',
   './viewer.js',
   './manifest.json',
