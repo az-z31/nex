@@ -4,16 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nex - Home</title>
-  <link rel="stylesheet" href="./styles.css">
+  <link rel="stylesheet" href="./homestyles.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <!-- Favicon -->
   <link rel="icon" type="image/x-icon" href="./icons/favicon.ico">
 </head>
 <body>
+  <header class="search-header">
+    <div class="search-container">
+      <input type="text" placeholder="Search..." class="search-input">
+      <button class="search-button">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <path fill="currentColor" d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
   <div class="home-container">
-    <h1>Welcome to Nex</h1>
-    <p>Your lightweight PDF reader</p>
-    <a href="pdf.html" class="cta-button">Open PDF Reader</a>
+    <div id="continue-reading">
+      <h2>Continue Reading</h2>
+      <div id="recent-books"></div>
+    </div>
   </div>
+
+  <script src="./viewer.js"></script>
 </body>
 </html> 
