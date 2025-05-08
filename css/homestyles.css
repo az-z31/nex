@@ -16,86 +16,258 @@ body {
   overflow: hidden;
 }
 
-.search-header {
-  position: sticky;
-  top: 0;
-  background: var(--background-color);
-  padding: 1.5rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  height: 100vh;
   display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+}
+
+.search-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: #121212;
+  padding: 10px;
+  z-index: 1000;
+  transition: opacity 0.2s ease;
+}
+
+#search-header.hidden {
+  opacity: 0;
+  pointer-events: none;
 }
 
 .search-container {
-  max-width: 1000px;
-  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
   display: flex;
-  gap: 0.5rem;
-  padding-left: 0;
+  gap: 10px;
+  background-color: #121212;
+  padding: 8px;
+  border-radius: 8px;
 }
 
 .search-input {
   flex: 1;
-  padding: 0.75rem 1rem;
+  padding: 8px 12px;
   border: 1px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 1rem;
-  font-family: 'Inter', sans-serif;
-  background-color: var(--surface-color);
+  border-radius: 4px;
+  background-color: var(--background-color);
   color: var(--text-color);
-  outline: none;
-}
-
-.search-input:focus {
-  border-color: var(--primary-color);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
 }
 
 .search-button {
-  background: none;
-  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background-color: #121212;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
   cursor: pointer;
-  padding: 0.75rem;
-  border-radius: 8px;
-  transition: background 0.2s;
-  color: var(--text-color);
+  transition: background-color 0.2s ease;
 }
 
 .search-button:hover {
-  background: var(--surface-color);
+  background-color: #1a1a1a;
+}
+
+.search-button:focus {
+  outline: none;
+  border-color: var(--border-color);
+  box-shadow: none;
 }
 
 .search-button svg {
-  display: block;
+  fill: white;
+  width: 24px;
+  height: 24px;
 }
 
-.logo {
+.search-icon {
+  fill: white;
+  color: white;
+  stroke: white;
+}
+
+#upload-zone {
+  width: 100%;
+  max-width: 600px;
+  height: 300px;
+  border: 2px dashed var(--text-color);
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin: 20px 0;
+}
+
+#upload-zone.dragover {
+  border-color: var(--primary-color);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#upload-content {
+  color: var(--text-color);
+  font-size: 1.1rem;
+  pointer-events: none;
+  padding: 20px;
+}
+
+#browse-text {
+  color: var(--primary-color);
+  font-weight: 500;
+  cursor: pointer;
+  pointer-events: auto;
+  text-decoration: underline;
+}
+
+#viewer {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: none;
 }
 
-/* Responsive adjustments */
-@media (max-width: 1024px) {
-  .search-container {
-    max-width: 90%;
-    padding-left: 0;
+#pdf-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+canvas {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: transparent;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  font-size: 24px;
+  cursor: pointer;
+  opacity: 0.8;
+  transition: opacity 0.2s ease;
+  border-radius: 0;
+  z-index: 2;
+  mix-blend-mode: difference;
+  display: none;
+}
+
+@media (pointer: fine) {
+  .nav-arrow {
+    display: block;
   }
 }
 
-@media (max-width: 768px) {
-  .search-container {
-    max-width: 100%;
-    padding-left: 0;
+#prevPage {
+  left: 20px;
+}
+
+#nextPage {
+  right: 20px;
+}
+
+#page-indicator {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: white;
+  z-index: 10;
+  font-family: 'Inter', sans-serif;
+}
+
+#page-indicator:hover {
+  background-color: rgba(0, 0, 0, 0.9);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+#page-indicator.percentage {
+  min-width: 80px;
+  text-align: center;
+}
+
+#top-bar {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  #top-bar {
+    display: flex;
+    position: fixed;
+    top: -60px;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(10px);
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 20px;
+    z-index: 1000;
+    transition: top 0.3s ease, opacity 0.3s ease;
   }
 }
 
-.home-container {
-  padding: 2rem;
-  max-width: 1200px;
-  margin: 0 auto;
+#back-button {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1001;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+#back-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#back-button svg {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
 }
 
 #continue-reading {
+  width: 100%;
+  max-width: 600px;
   margin-top: 2rem;
 }
 
@@ -107,7 +279,7 @@ body {
 
 #recent-books {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 1rem;
 }
 
@@ -127,11 +299,10 @@ body {
 }
 
 .placeholder-cover {
-  width: 100%;
-  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  height: 100%;
   background-color: #2c2c2c;
 }
 
@@ -153,4 +324,41 @@ body {
   left: 0;
   height: 4px;
   background-color: var(--primary-color);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  #recent-books {
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  }
+  
+  #back-button {
+    top: 10px;
+    left: 10px;
+    padding: 6px 12px;
+  }
+}
+
+/* Transitions */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: var(--border-color);
+  box-shadow: none;
+}
+
+.search-container:focus-within {
+  box-shadow: none;
+}
+
+/* Add this to remove focus outlines globally */
+*:focus {
+  outline: none;
 }

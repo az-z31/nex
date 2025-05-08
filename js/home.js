@@ -1,11 +1,175 @@
-// Function to display recent books
+// Initialize variables
+const fileInput = document.getElementById('fileInput');
+const viewer = document.getElementById('viewer');
+const uploadZone = document.getElementById('upload-zone');
+const continueReading = document.getElementById('continue-reading');
+const backButton = document.getElementById('back-button');
+const topBar = document.getElementById('top-bar');
+const pageIndicator = document.getElementById('page-indicator');
+const pdfContainer = document.getElementById('pdf-container');
+const recentBooksContainer = document.getElementById('recent-books');
+const browseText = document.getElementById('browse-text');
+
+let currentPage = 1;
+let pdfDoc = null;
+let scale = 1;
+let isTopBarVisible = false;
+let touchStartY = 0;
+let touchEndY = 0;
+const SWIPE_THRESHOLD = 50;
+let inactivityTimer;
+
+// Initialize UI
+topBar.style.top = '-60px';
+backButton.style.display = 'none';
+viewer.style.display = 'none';
+
+// Event listeners
+fileInput.addEventListener('change', handleFile);
+backButton.addEventListener('click', goBackToHome);
+document.addEventListener('keydown', handleKeyDown);
+document.addEventListener('mousemove', handleMouseMove);
+document.addEventListener('touchstart', handleTouchStart);
+document.addEventListener('touchend', handleTouchEnd);
+pageIndicator.addEventListener('click', togglePercentage);
+
+// Add these after your existing event listeners
+document.getElementById('prevPage').addEventListener('click', previousPage);
+document.getElementById('nextPage').addEventListener('click', nextPage);
+
+// Add swipe handling only for touch devices
+if (window.matchMedia('(pointer: coarse)').matches) {
+  document.addEventListener('touchstart', handleTouchStart);
+  document.addEventListener('touchend', handleTouchEnd);
+}
+
+// Initialize when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+  const recentBooks = JSON.parse(localStorage.getItem('recentBooks') || '[]');
+  if (recentBooks.length > 0) {
+    continueReading.style.display = 'block';
+    displayRecentBooks();
+  } else {
+    continueReading.style.display = 'none';
+  }
+});
+
+// File handling
+function handleFile(e) {
+  const file = e.target.files[0];
+  if (!file || file.type !== 'application/pdf') {
+    alert('Please upload a valid PDF.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function (e) {
+    const searchHeader = document.querySelector('.search-header');
+    if (searchHeader) {
+      searchHeader.classList.add('hidden');
+    }
+    
+    uploadZone.style.display = 'none';
+    viewer.style.display = 'block';
+    continueReading.style.display = 'none';
+    backButton.style.display = 'block';
+    
+    // Load PDF using PDF.js
+    const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(e.target.result) });
+    loadingTask.promise.then(pdf => {
+      pdfDoc = pdf;
+      currentPage = 1;
+      renderPage(currentPage);
+    }).catch(error => {
+      console.error('Error loading PDF:', error);
+      alert('Error loading PDF. Please try again.');
+      goBackToHome();
+    });
+  };
+  
+  reader.readAsArrayBuffer(file);
+}
+
+// PDF rendering
+function renderPDF(data) {
+  pdfjsLib.getDocument(data).promise.then(pdf => {
+    pdfDoc = pdf;
+    renderPage(1);
+  }).catch(error => {
+    console.error('Error loading PDF:', error);
+    alert('Error loading PDF. Please try again.');
+  });
+}
+
+function renderPage(pageNum) {
+  pdfDoc.getPage(pageNum).then(page => {
+    const scale = Math.min(
+      pdfContainer.clientWidth / page.getViewport({ scale: 1 }).width,
+      pdfContainer.clientHeight / page.getViewport({ scale: 1 }).height
+    );
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+    canvas.height = viewport.height;
+    canvas.width = viewport.width;
+    
+    // Clear previous content
+    pdfContainer.innerHTML = '';
+    pdfContainer.appendChild(canvas);
+    
+    // Render PDF page
+    const renderContext = {
+      canvasContext: context,
+      viewport: viewport
+    };
+    page.render(renderContext);
+    
+    // Update page indicator
+    updatePageIndicator();
+  }).catch(error => {
+    console.error('Error rendering page:', error);
+  });
+}
+
+// Navigation
+function goToPage(pageNum) {
+  if (pageNum < 1 || pageNum > pdfDoc.numPages) return;
+  renderPage(pageNum);
+}
+
+function nextPage() {
+  if (currentPage < pdfDoc.numPages) {
+    goToPage(currentPage + 1);
+  }
+}
+
+function previousPage() {
+  if (currentPage > 1) {
+    goToPage(currentPage - 1);
+  }
+}
+
+// UI updates
+function updatePageIndicator() {
+  pageIndicator.textContent = `Page ${currentPage} of ${pdfDoc.numPages}`;
+}
+
+function togglePercentage() {
+  const indicator = document.getElementById('page-indicator');
+  if (indicator.classList.contains('percentage')) {
+    indicator.textContent = `Page ${currentPage} of ${pdfDoc.numPages}`;
+    indicator.classList.remove('percentage');
+  } else {
+    const percentage = Math.round((currentPage / pdfDoc.numPages) * 100);
+    indicator.textContent = `${percentage}%`;
+    indicator.classList.add('percentage');
+  }
+}
+
+// Continue reading
 function displayRecentBooks() {
   const recentBooks = JSON.parse(localStorage.getItem('recentBooks') || '[]');
-  const container = document.getElementById('recent-books');
-  
-  if (!container) return;
-  
-  container.innerHTML = '';
+  recentBooksContainer.innerHTML = '';
   
   recentBooks.forEach(book => {
     const bookElement = document.createElement('div');
@@ -22,25 +186,137 @@ function displayRecentBooks() {
     `;
     
     bookElement.addEventListener('click', () => {
-      // Redirect to pdf.html when a book is clicked
-      window.location.href = 'pdf.html';
+      const file = new File([book.data], book.name, { type: 'application/pdf' });
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        uploadZone.style.display = 'none';
+        viewer.style.display = 'block';
+        continueReading.style.display = 'none';
+        backButton.style.display = 'block';
+        renderPDF(e.target.result, book.lastPage);
+      };
+      reader.readAsArrayBuffer(file);
     });
     
-    container.appendChild(bookElement);
+    recentBooksContainer.appendChild(bookElement);
   });
 }
 
-// Initialize when the page loads
-document.addEventListener('DOMContentLoaded', () => {
+// Save state
+function saveBookInfo(name, data) {
   const recentBooks = JSON.parse(localStorage.getItem('recentBooks') || '[]');
-  const continueReading = document.getElementById('continue-reading');
+  const existingIndex = recentBooks.findIndex(book => book.name === name);
   
-  if (continueReading) {
-    if (recentBooks.length > 0) {
-      continueReading.style.display = 'block';
-      displayRecentBooks();
+  const bookInfo = {
+    name: name,
+    data: data,
+    lastPage: currentPage,
+    totalPages: pdfDoc.numPages,
+    timestamp: new Date().getTime()
+  };
+  
+  if (existingIndex !== -1) {
+    recentBooks[existingIndex] = bookInfo;
+  } else {
+    recentBooks.push(bookInfo);
+  }
+  
+  localStorage.setItem('recentBooks', JSON.stringify(recentBooks));
+}
+
+function saveCurrentPage() {
+  const recentBooks = JSON.parse(localStorage.getItem('recentBooks') || '[]');
+  const currentBook = recentBooks.find(book => book.data === pdfDoc);
+  if (currentBook) {
+    currentBook.lastPage = currentPage;
+    localStorage.setItem('recentBooks', JSON.stringify(recentBooks));
+  }
+}
+
+// Navigation handlers
+function handleKeyDown(e) {
+  if (!pdfDoc) return;
+  
+  switch (e.key) {
+    case 'ArrowRight':
+      nextPage();
+      break;
+    case 'ArrowLeft':
+      previousPage();
+      break;
+  }
+}
+
+function handleMouseMove() {
+  if (!isTopBarVisible) {
+    showTopBar();
+    startInactivityTimer();
+  }
+}
+
+function handleTouchStart(e) {
+  touchStartY = e.touches[0].clientY;
+}
+
+function handleTouchEnd(e) {
+  touchEndY = e.changedTouches[0].clientY;
+  const deltaY = touchStartY - touchEndY;
+  
+  if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
+    if (deltaY > 0) {
+      nextPage();
     } else {
-      continueReading.style.display = 'none';
+      previousPage();
     }
+  }
+}
+
+// Top bar controls
+function showTopBar() {
+  isTopBarVisible = true;
+  topBar.style.top = '0';
+}
+
+function hideTopBar() {
+  isTopBarVisible = false;
+  topBar.style.top = '-60px';
+}
+
+function startInactivityTimer() {
+  clearTimeout(inactivityTimer);
+  inactivityTimer = setTimeout(hideTopBar, 2000);
+}
+
+// Back to home
+function goBackToHome() {
+  document.querySelector('.search-header').classList.remove('hidden');
+  viewer.style.display = 'none';
+  uploadZone.style.display = 'flex';
+  continueReading.style.display = 'block';
+  backButton.style.display = 'none';
+  pdfDoc = null;
+  currentPage = 1;
+  fileInput.value = '';
+}
+
+// Add these event listeners
+browseText.addEventListener('click', () => fileInput.click());
+
+// Handle drag and drop
+uploadZone.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  uploadZone.classList.add('dragover');
+});
+
+uploadZone.addEventListener('dragleave', () => {
+  uploadZone.classList.remove('dragover');
+});
+
+uploadZone.addEventListener('drop', (e) => {
+  e.preventDefault();
+  uploadZone.classList.remove('dragover');
+  if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    fileInput.files = e.dataTransfer.files;
+    handleFile({ target: fileInput });
   }
 });
