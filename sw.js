@@ -3,8 +3,11 @@ const ASSETS = [
   './',
   './index.html',
   './home.html',
-  './styles.css',
-  './viewer.js',
+  './pdf.html',
+  './css/styles.css',
+  './css/homestyles.css',
+  './js/viewer.js',
+  './js/home.js',
   './manifest.json',
   './icons/icon-192.jpg',
   './icons/icon-512.jpg'
