@@ -1,3 +1,5 @@
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@2.10.377/build/pdf.worker.min.js';
+
 // Initialize variables
 const fileInput = document.getElementById('fileInput');
 const viewer = document.getElementById('viewer');
@@ -18,6 +20,7 @@ let touchStartY = 0;
 let touchEndY = 0;
 const SWIPE_THRESHOLD = 50;
 let inactivityTimer;
+let currentFileName = null;
 
 // Initialize UI
 topBar.style.top = '-60px';
@@ -62,6 +65,9 @@ function handleFile(e) {
     return;
   }
 
+  // Set the current file name
+  currentFileName = file.name;
+
   const reader = new FileReader();
   reader.onload = function (e) {
     const searchHeader = document.querySelector('.search-header');
@@ -74,11 +80,47 @@ function handleFile(e) {
     continueReading.style.display = 'none';
     backButton.style.display = 'block';
     
+    // Check for existing reading progress
+    const recentBooks = JSON.parse(localStorage.getItem('recentBooks') || '[]');
+    const existingBook = recentBooks.find(book => book.name === file.name);
+    const startPage = existingBook ? Math.min(existingBook.lastPage, existingBook.totalPages) : 1;
+
     const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(e.target.result) });
     loadingTask.promise.then(pdf => {
       pdfDoc = pdf;
-      currentPage = 1;
+      currentPage = startPage;
+      
+      // Update the book info with the new data
+      const updatedBooks = recentBooks.map(book => {
+        if (book.name === file.name) {
+          return {
+            ...book,
+            totalPages: pdf.numPages,
+            lastPage: currentPage
+          };
+        }
+        return book;
+      });
+      
+      // If the book doesn't exist, add it
+      if (!existingBook) {
+        updatedBooks.unshift({
+          name: file.name,
+          lastPage: currentPage,
+          totalPages: pdf.numPages,
+          timestamp: new Date().getTime()
+        });
+      }
+      
+      // Keep only last 5 books
+      if (updatedBooks.length > 5) updatedBooks.pop();
+      
+      localStorage.setItem('recentBooks', JSON.stringify(updatedBooks));
+      displayRecentBooks();
+      
+      // Render the page after updating the book info
       renderPage(currentPage);
+      updatePageIndicator();
     }).catch(error => {
       console.error('Error loading PDF:', error);
       alert('Error loading PDF. Please try again.');
@@ -101,6 +143,11 @@ function renderPDF(data) {
 }
 
 function renderPage(pageNum) {
+  if (!pdfDoc) {
+    console.error('PDF document not loaded');
+    return;
+  }
+
   pdfDoc.getPage(pageNum).then(page => {
     const scale = Math.min(
       pdfContainer.clientWidth / page.getViewport({ scale: 1 }).width,
@@ -121,6 +168,7 @@ function renderPage(pageNum) {
     };
     page.render(renderContext);
     
+    console.log(`Page ${pageNum} rendered`);
     updatePageIndicator();
   }).catch(error => {
     console.error('Error rendering page:', error);
@@ -136,6 +184,7 @@ function goToPage(pageNum) {
 function nextPage() {
   if (currentPage < pdfDoc.numPages) {
     currentPage++;
+    updateCurrentPage(currentPage);
     renderPage(currentPage);
     updatePageIndicator();
   }
@@ -144,6 +193,7 @@ function nextPage() {
 function previousPage() {
   if (currentPage > 1) {
     currentPage--;
+    updateCurrentPage(currentPage);
     renderPage(currentPage);
     updatePageIndicator();
   }
@@ -186,16 +236,8 @@ function displayRecentBooks() {
     `;
     
     bookElement.addEventListener('click', () => {
-      const file = new File([book.data], book.name, { type: 'application/pdf' });
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        uploadZone.style.display = 'none';
-        viewer.style.display = 'block';
-        continueReading.style.display = 'none';
-        backButton.style.display = 'block';
-        renderPDF(e.target.result, book.lastPage);
-      };
-      reader.readAsArrayBuffer(file);
+      alert('Please re-upload the PDF file to continue reading.');
+      fileInput.click();
     });
     
     recentBooksContainer.appendChild(bookElement);
@@ -203,25 +245,34 @@ function displayRecentBooks() {
 }
 
 // Save state
-function saveBookInfo(name, data) {
-  const recentBooks = JSON.parse(localStorage.getItem('recentBooks') || '[]');
-  const existingIndex = recentBooks.findIndex(book => book.name === name);
+function saveBookInfo(name, data, totalPages) {
+  const arrayBuffer = new Uint8Array(data).buffer;
   
-  const bookInfo = {
-    name: name,
-    data: data,
-    lastPage: currentPage,
-    totalPages: pdfDoc.numPages,
-    timestamp: new Date().getTime()
-  };
-  
-  if (existingIndex !== -1) {
-    recentBooks[existingIndex] = bookInfo;
-  } else {
-    recentBooks.push(bookInfo);
-  }
-  
-  localStorage.setItem('recentBooks', JSON.stringify(recentBooks));
+  pdfjsLib.getDocument({ data: arrayBuffer }).promise.then(pdf => {
+    const books = JSON.parse(localStorage.getItem('recentBooks') || '[]');
+    
+    // Check if book already exists
+    const existingIndex = books.findIndex(book => book.name === name);
+    if (existingIndex > -1) {
+      books.splice(existingIndex, 1);
+    }
+    
+    // Add new book to the beginning
+    books.unshift({
+      name: name,
+      lastPage: currentPage,
+      totalPages: totalPages,
+      timestamp: new Date().getTime()
+    });
+    
+    // Keep only last 5 books
+    if (books.length > 5) books.pop();
+    
+    localStorage.setItem('recentBooks', JSON.stringify(books));
+    displayRecentBooks();
+  }).catch(error => {
+    console.error('Error saving book info:', error);
+  });
 }
 
 function saveCurrentPage() {
@@ -299,6 +350,7 @@ function goBackToHome() {
   backButton.style.display = 'none';
   pdfDoc = null;
   currentPage = 1;
+  currentFileName = null;
   fileInput.value = '';
 }
 
@@ -323,3 +375,18 @@ uploadZone.addEventListener('drop', (e) => {
     handleFile({ target: fileInput });
   }
 });
+
+// Add this function to handle page changes
+function updateCurrentPage(page) {
+  const recentBooks = JSON.parse(localStorage.getItem('recentBooks') || '[]');
+  const updatedBooks = recentBooks.map(book => {
+    if (book.name === currentFileName) {
+      return {
+        ...book,
+        lastPage: page
+      };
+    }
+    return book;
+  });
+  localStorage.setItem('recentBooks', JSON.stringify(updatedBooks));
+}
