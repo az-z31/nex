@@ -16,7 +16,9 @@ let currentPage = 1;
 let pdfDoc = null;
 let scale = 1;
 let isTopBarVisible = false;
+let touchStartX = 0;
 let touchStartY = 0;
+let touchEndX = 0;
 let touchEndY = 0;
 const SWIPE_THRESHOLD = 50;
 let inactivityTimer;
@@ -64,9 +66,6 @@ function handleFile(e) {
     alert('Please upload a valid PDF.');
     return;
   }
-
-  // Set the current file name
-  currentFileName = file.name;
 
   const reader = new FileReader();
   reader.onload = function (e) {
@@ -121,6 +120,18 @@ function handleFile(e) {
       // Render the page after updating the book info
       renderPage(currentPage);
       updatePageIndicator();
+      
+      // Remove automatic top bar show
+      // if (window.matchMedia('(pointer: coarse)').matches) {
+      //   showTopBar();
+      // }
+      
+      // Hide desktop back button on mobile
+      if (window.matchMedia('(pointer: coarse)').matches) {
+        backButton.style.display = 'none';
+      } else {
+        backButton.style.display = 'block';
+      }
     }).catch(error => {
       console.error('Error loading PDF:', error);
       alert('Error loading PDF. Please try again.');
@@ -306,31 +317,50 @@ function handleMouseMove() {
 }
 
 function handleTouchStart(e) {
+  touchStartX = e.touches[0].clientX;
   touchStartY = e.touches[0].clientY;
 }
 
 function handleTouchEnd(e) {
+  touchEndX = e.changedTouches[0].clientX;
   touchEndY = e.changedTouches[0].clientY;
-  const deltaY = touchStartY - touchEndY;
   
-  if (Math.abs(deltaY) > SWIPE_THRESHOLD) {
-    if (deltaY > 0) {
-      nextPage();
-    } else {
+  const deltaX = touchEndX - touchStartX;
+  const deltaY = touchEndY - touchStartY;
+  
+  // Horizontal swipe for page navigation
+  if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > SWIPE_THRESHOLD) {
+    if (deltaX > 0) {
       previousPage();
+    } else {
+      nextPage();
+    }
+  }
+  
+  // Vertical swipe for top bar
+  if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > SWIPE_THRESHOLD) {
+    if (deltaY > 0 && !isTopBarVisible) {
+      showTopBar();
+    } else if (deltaY < 0 && isTopBarVisible) {
+      hideTopBar();
     }
   }
 }
 
 // Top bar controls
 function showTopBar() {
-  isTopBarVisible = true;
-  topBar.style.top = '0';
+  if (window.matchMedia('(pointer: coarse)').matches && pdfDoc) {
+    isTopBarVisible = true;
+    topBar.style.top = '0';
+    startInactivityTimer();
+  }
 }
 
 function hideTopBar() {
-  isTopBarVisible = false;
-  topBar.style.top = '-60px';
+  if (window.matchMedia('(pointer: coarse)').matches) {
+    isTopBarVisible = false;
+    topBar.style.top = '-60px';
+  }
 }
 
 function startInactivityTimer() {
@@ -352,6 +382,9 @@ function goBackToHome() {
   currentPage = 1;
   currentFileName = null;
   fileInput.value = '';
+  if (window.matchMedia('(pointer: coarse)').matches) {
+    hideTopBar();
+  }
 }
 
 // Add these event listeners
@@ -390,3 +423,6 @@ function updateCurrentPage(page) {
   });
   localStorage.setItem('recentBooks', JSON.stringify(updatedBooks));
 }
+
+// Add mobile back button event listener
+document.getElementById('mobile-back-button').addEventListener('click', goBackToHome);
