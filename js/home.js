@@ -84,6 +84,8 @@ function handleFile(e) {
     const existingBook = recentBooks.find(book => book.name === file.name);
     const startPage = existingBook ? Math.min(existingBook.lastPage, existingBook.totalPages) : 1;
 
+    currentFileName = file.name;
+
     const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(e.target.result) });
     loadingTask.promise.then(pdf => {
       pdfDoc = pdf;
