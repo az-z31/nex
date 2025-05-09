@@ -68,15 +68,15 @@ body {
   align-items: center;
   justify-content: center;
   padding: 8px;
-  background-color: #121212;
+  background-color: transparent;
   border: 1px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
   transition: background-color 0.2s ease;
 }
 
 .search-button:hover {
-  background-color: #1a1a1a;
+  background-color: rgba(255, 255, 255, 0.1);
 }
 
 .search-button:focus {

@@ -66,7 +66,7 @@ function handleFile(e) {
   reader.onload = function (e) {
     const searchHeader = document.querySelector('.search-header');
     if (searchHeader) {
-      searchHeader.classList.add('hidden');
+      searchHeader.style.display = 'none';
     }
     
     uploadZone.style.display = 'none';
@@ -74,7 +74,6 @@ function handleFile(e) {
     continueReading.style.display = 'none';
     backButton.style.display = 'block';
     
-    // Load PDF using PDF.js
     const loadingTask = pdfjsLib.getDocument({ data: new Uint8Array(e.target.result) });
     loadingTask.promise.then(pdf => {
       pdfDoc = pdf;
@@ -113,18 +112,15 @@ function renderPage(pageNum) {
     canvas.height = viewport.height;
     canvas.width = viewport.width;
     
-    // Clear previous content
     pdfContainer.innerHTML = '';
     pdfContainer.appendChild(canvas);
     
-    // Render PDF page
     const renderContext = {
       canvasContext: context,
       viewport: viewport
     };
     page.render(renderContext);
     
-    // Update page indicator
     updatePageIndicator();
   }).catch(error => {
     console.error('Error rendering page:', error);
@@ -139,13 +135,17 @@ function goToPage(pageNum) {
 
 function nextPage() {
   if (currentPage < pdfDoc.numPages) {
-    goToPage(currentPage + 1);
+    currentPage++;
+    renderPage(currentPage);
+    updatePageIndicator();
   }
 }
 
 function previousPage() {
   if (currentPage > 1) {
-    goToPage(currentPage - 1);
+    currentPage--;
+    renderPage(currentPage);
+    updatePageIndicator();
   }
 }
 
@@ -289,7 +289,10 @@ function startInactivityTimer() {
 
 // Back to home
 function goBackToHome() {
-  document.querySelector('.search-header').classList.remove('hidden');
+  const searchHeader = document.querySelector('.search-header');
+  if (searchHeader) {
+    searchHeader.style.display = 'block';
+  }
   viewer.style.display = 'none';
   uploadZone.style.display = 'flex';
   continueReading.style.display = 'block';
