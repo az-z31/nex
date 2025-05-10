@@ -429,7 +429,8 @@ function updateCurrentPage(page) {
 // Add mobile back button event listener
 document.getElementById('mobile-back-button').addEventListener('click', goBackToHome);
 
-document.querySelector('.search-button').addEventListener('click', async () => {
+// Function to perform the search
+async function performSearch() {
   const query = document.querySelector('.search-input').value;
   if (!query) return;
 
@@ -441,9 +442,17 @@ document.querySelector('.search-button').addEventListener('click', async () => {
     }
     const books = await response.json();
 
+    // Hide the upload box and continue reading section
+    const uploadZone = document.getElementById('upload-zone');
+    const continueReading = document.getElementById('continue-reading');
+    uploadZone.style.display = 'none';
+    continueReading.style.display = 'none';
+
     // Clear previous results
     const resultsContainer = document.createElement('div');
     resultsContainer.id = 'search-results';
+    resultsContainer.style.overflowY = 'auto'; // Make results scrollable
+    resultsContainer.style.maxHeight = '80vh'; // Limit height for scrolling
     resultsContainer.innerHTML = '';
 
     // Display book tiles
@@ -451,7 +460,7 @@ document.querySelector('.search-button').addEventListener('click', async () => {
       const bookTile = document.createElement('div');
       bookTile.className = 'book-tile';
       bookTile.innerHTML = `
-        <img src="${book.coverUrl}" alt="${book.title}" class="book-cover">
+        <img src="${book.coverUrl}" alt="${book.title}" class="book-cover" onerror="this.src='./icons/placeholder-cover.jpg'">
         <div class="book-info">
           <h3>${book.title}</h3>
           <p>${book.author}</p>
@@ -467,6 +476,16 @@ document.querySelector('.search-button').addEventListener('click', async () => {
   } catch (error) {
     console.error('Error:', error);
     alert(error.message || 'Failed to fetch books');
+  }
+}
+
+// Search button click event
+document.querySelector('.search-button').addEventListener('click', performSearch);
+
+// Enter key event for search input
+document.querySelector('.search-input').addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    performSearch();
   }
 });
 
