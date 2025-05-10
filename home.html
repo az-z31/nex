@@ -63,5 +63,10 @@
   </div>
 
   <script src="./js/home.js"></script>
+  <script>
+    if (typeof pdfjsLib === 'undefined') {
+      document.write('<script src="./js/pdf.worker.min.js"><\/script>');
+    }
+  </script>
 </body>
 </html> 

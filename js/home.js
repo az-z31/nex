@@ -428,3 +428,100 @@ function updateCurrentPage(page) {
 
 // Add mobile back button event listener
 document.getElementById('mobile-back-button').addEventListener('click', goBackToHome);
+
+document.querySelector('.search-button').addEventListener('click', async () => {
+  const query = document.querySelector('.search-input').value;
+  if (!query) return;
+
+  try {
+    const response = await fetch(`http://localhost:3001/search?q=${encodeURIComponent(query)}`);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to fetch books');
+    }
+    const books = await response.json();
+
+    // Clear previous results
+    const resultsContainer = document.createElement('div');
+    resultsContainer.id = 'search-results';
+    resultsContainer.innerHTML = '';
+
+    // Display book tiles
+    books.forEach(book => {
+      const bookTile = document.createElement('div');
+      bookTile.className = 'book-tile';
+      bookTile.innerHTML = `
+        <img src="${book.coverUrl}" alt="${book.title}" class="book-cover">
+        <div class="book-info">
+          <h3>${book.title}</h3>
+          <p>${book.author}</p>
+        </div>
+      `;
+      bookTile.addEventListener('click', () => showBookDetails(book));
+      resultsContainer.appendChild(bookTile);
+    });
+
+    // Replace the search header with results
+    const searchHeader = document.querySelector('.search-header');
+    searchHeader.replaceWith(resultsContainer);
+  } catch (error) {
+    console.error('Error:', error);
+    alert(error.message || 'Failed to fetch books');
+  }
+});
+
+async function showBookDetails(book) {
+  const modal = document.createElement('div');
+  modal.className = 'book-modal';
+  modal.innerHTML = `
+    <div class="modal-content">
+      <img src="./icons/placeholder-cover.jpg" alt="${book.title}" class="modal-cover">
+      <h2>${book.title}</h2>
+      <p>${book.author}</p>
+      <div class="modal-actions">
+        <button class="view-button">View</button>
+        <button class="download-button">Download</button>
+      </div>
+      <button class="close-button">Close</button>
+    </div>
+  `;
+
+  // Fetch the cover image dynamically
+  try {
+    const response = await fetch(`http://localhost:3001/book-details?md5=${book.md5}`);
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Failed to fetch book details');
+    }
+    const data = await response.json();
+    modal.querySelector('.modal-cover').src = data.coverUrl;
+  } catch (error) {
+    console.error('Error fetching cover image:', error);
+  }
+
+  // Add event listeners for buttons
+  modal.querySelector('.view-button').addEventListener('click', () => {
+    window.location.href = `http://localhost:3001/pdfs/${book.md5}.pdf`;
+  });
+
+  modal.querySelector('.download-button').addEventListener('click', async () => {
+    try {
+      const response = await fetch(`http://localhost:3001/download?md5=${book.md5}&title=${encodeURIComponent(book.title)}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to download book');
+      }
+      const data = await response.json();
+      window.location.href = `http://localhost:3001${data.url}`;
+    } catch (error) {
+      console.error('Error:', error);
+      alert(error.message || 'Failed to download book');
+    }
+  });
+
+  modal.querySelector('.close-button').addEventListener('click', () => {
+    modal.remove();
+  });
+
+  document.body.appendChild(modal);
+}
