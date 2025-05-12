@@ -11,7 +11,7 @@ const upload = multer({ dest: 'uploads/' });
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3001', 'https://your-github-pages-url.github.io'], // Add your frontend URL
+  origin: ['http://localhost:3001', 'https://your-github-pages-url.github.io'], // will add frontend url later
   credentials: true,
 }));
 app.use(express.json());
@@ -42,22 +42,54 @@ async function searchLibGen(query) {
     const md5Link = $(row).find('td:nth-child(10) a').attr('href');
     if (md5Link) {
       const md5 = md5Link.split('md5=')[1];
-      const coverUrl = `https://covers.libgen.rs/cover/${md5}`; // Updated cover URL
+      const coverUrl = `https://covers.libgen.rs/cover/${md5}`;
       books.push({ title, author, md5, coverUrl });
     }
   });
 
+  console.log('Books from LibGen:', books); // Debugging: Log the books
   return books;
 }
 
 async function downloadBook(md5, title) {
   try {
-    const downloadUrl = `http://library.lol/main/${md5}`;
-    const response = await axios.get(downloadUrl, { responseType: 'arraybuffer' });
+    const downloadUrl = `http://libgen.gs/ads.php?md5=${md5}`;
+    const response = await axios.get(downloadUrl);
+    const $ = cheerio.load(response.data);
+
+    // Extract the download link
+    const downloadLinks = $('a[href*="get.php"]').map((i, el) => $(el).attr('href')).get();
+    if (!downloadLinks.length) {
+      throw new Error('No download link found');
+    }
+
+    const getUrl = `https://libgen.gs/${downloadLinks[0]}`;
+    const redirectResponse = await axios.get(getUrl, {
+      headers: {
+        'Referer': 'https://libgen.gs/',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36'
+      },
+      maxRedirects: 0,
+      validateStatus: (status) => status >= 200 && status < 400
+    });
+
+    const redirectUrl = redirectResponse.headers.location;
+    if (!redirectUrl) {
+      throw new Error('Failed to get redirect URL');
+    }
+
+    // Download the actual file
+    const fileResponse = await axios.get(redirectUrl, {
+      responseType: 'arraybuffer',
+      headers: {
+        'Referer': getUrl,
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Mobile Safari/537.36'
+      }
+    });
 
     const fileName = `${Date.now()}_${title}.pdf`;
     const filePath = path.join(__dirname, 'uploads', fileName);
-    fs.writeFileSync(filePath, response.data);
+    fs.writeFileSync(filePath, fileResponse.data);
 
     return fileName;
   } catch (error) {
