@@ -4,13 +4,13 @@ A lightweight PDF reader built with JavaScript, PDF.js.
 
 ## Features
 
-- 📄 PDF file support
-- 📱 Responsive design
-- ↔️ Swipe navigation (mobile)
-- ◄► Page navigation buttons
-- ⚡ Fast rendering
-- 📦 Progressive Web App (PWA) support
-- 📘 Dictionary mode(Work on progress)
+-  PDF file support
+-  Responsive design
+-  Swipe navigation (mobile)
+-  Page navigation buttons
+-  Fast rendering
+-  Progressive Web App (PWA) support
+-  Dictionary mode(Work on progress)
 
 ## Installation
 
