@@ -1,4 +1,4 @@
-# Nex
+# Nex (Project Temporarily Halted)
 
 A lightweight PDF reader built with JavaScript, PDF.js. 
 
